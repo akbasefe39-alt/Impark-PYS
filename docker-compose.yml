@@ -1,0 +1,30 @@
+
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: pys-backend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend/database.sqlite:/app/database.sqlite
+      - ./backend/uploads:/app/uploads
+      - ./backend/backups:/app/backups
+    env_file:
+      - ./backend/.env
+    restart: always
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=http://localhost:3000
+    container_name: pys-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: always

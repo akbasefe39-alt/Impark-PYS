@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+/* 🖋️ TYPOGRAPHY & RENDERING OPTIMIZATION */
+:root {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-feature-settings: "cv02", "cv05", "cv08", "cv11";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  letter-spacing: -0.011em;
+}
+
+/* LIGHT THEME INVERT OVERRIDES */
+body.light-theme {
+  background-color: #fafafa !important;
+  color: #3f3f46 !important;
+}
+
+/* Deep Backgrounds (Main Panels) */
+body.light-theme .bg-zinc-950 { background-color: #f4f4f5 !important; }
+body.light-theme .bg-zinc-900 { background-color: #ffffff !important; }
+body.light-theme .bg-zinc-800 { background-color: #e4e4e7 !important; }
+
+/* Borders */
+body.light-theme .border-zinc-800 { border-color: #e4e4e7 !important; }
+body.light-theme .border-zinc-700 { border-color: #d4d4d8 !important; }
+
+/* Text & Headings */
+body.light-theme .text-zinc-100 { color: #18181b !important; }
+body.light-theme .text-zinc-300 { color: #3f3f46 !important; }
+body.light-theme .text-zinc-400 { color: #52525b !important; }
+body.light-theme .text-zinc-500 { color: #71717a !important; }
+
+/* Inputs and Forms */
+body.light-theme input, body.light-theme select, body.light-theme textarea {
+  color: #18181b !important;
+}
+body.light-theme input::placeholder {
+  color: #a1a1aa !important;
+}
+
+/* Table Hover */
+body.light-theme tr:hover td {
+  background-color: #f4f4f5 !important;
+}

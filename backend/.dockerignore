@@ -1,0 +1,9 @@
+node_modules
+dist
+npm-debug.log
+database.sqlite
+backups
+uploads
+.env
+Dockerfile
+.dockerignore
