@@ -241,6 +241,40 @@ function App() {
       setTaskForm(prev => prev.personelId === uid ? prev : { ...prev, personelId: uid });
     }
   }, [currentTab, isManager, currentUser]);
+  
+  // 🛡️ GÜVENLİK: 15 Dakika İşlem Yapılmazsa Otomatik Çıkış (Inactivity Logout)
+  useEffect(() => {
+    if (!isLoggedIn) return;
+
+    let timeoutId;
+    const INACTIVITY_TIME = 15 * 60 * 1000; // 15 dakika
+
+    const resetTimer = () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        handleLogout();
+      }, INACTIVITY_TIME);
+    };
+
+    const handleLogout = () => {
+      localStorage.removeItem('token');
+      window.location.reload();
+    };
+
+    // Dinlenecek olaylar (Klavye, mouse, kaydırma vb.)
+    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
+    
+    // İlk timer'ı başlat
+    resetTimer();
+
+    // Olayları ekle
+    events.forEach(event => document.addEventListener(event, resetTimer));
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      events.forEach(event => document.removeEventListener(event, resetTimer));
+    };
+  }, [isLoggedIn]);
 
   // 🛡️ GÜVENLİK SENKRONİZASYONU: Kişisel ayarları Token yerine API'den (me) al
   useEffect(() => {
