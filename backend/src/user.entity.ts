@@ -178,6 +178,9 @@ export class User {
   @Column({ default: false })
   mfaEnabled: boolean;
 
+  @Column({ default: false })
+  mustChangePassword: boolean;
+
   @Column({ nullable: true })
   @Exclude()
   mfaCode: string;

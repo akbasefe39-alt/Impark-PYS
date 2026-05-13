@@ -114,6 +114,8 @@ function App() {
   const [forgotEmail, setForgotEmail] = useState('');
   const [newPass, setNewPass] = useState('');
   const [confPass, setConfPass] = useState('');
+  const [mustPass, setMustPass] = useState('');
+  const [mustConf, setMustConf] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
 
 
@@ -168,7 +170,8 @@ function App() {
           canManageFinance: payload.canManageFinance,
           canApproveLeaves: payload.canApproveLeaves,
           canManageInventory: payload.canManageInventory,
-          canViewLogs: payload.canViewLogs
+          canViewLogs: payload.canViewLogs,
+          mustChangePassword: payload.mustChangePassword
         });
         setIsLoggedIn(true); 
         fetchData(payload.sub, payload.role);
@@ -583,6 +586,28 @@ function App() {
     }
   };
 
+  const handleMustChangePassword = async (e) => {
+    e.preventDefault();
+    if (!mustPass || mustPass.length < 3) return showNotification(tr("Password too short", "Şifre çok kısa"), "error");
+    if (mustPass !== mustConf) return showNotification(tr("Passwords do not match", "Şifreler uyuşmuyor"), "error");
+    
+    setIsProcessing(true);
+    try {
+      await api.put(`/users/update-profile/${currentUser.id}`, { password: mustPass });
+      showNotification(tr("Password changed successfully!", "Şifre başarıyla değiştirildi!"), "success");
+      
+      // Token'ı yenilemek için logout/login veya mevcut token'daki flag'i manuel temizlemek gerekebilir.
+      // En güvenli yol token'ı silip tekrar login'e atmak veya state'i güncellemek.
+      // Burada sadece state'i güncelliyoruz ve reload yapıyoruz ki backend'den yeni token gelsin (veya token'ı silebiliriz).
+      localStorage.removeItem('token');
+      window.location.reload();
+    } catch (err) {
+      showNotification(err.response?.data?.message || tr("An error occurred", "Bir hata oluştu"), "error");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   if (!isLoggedIn) return (
     <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center p-4">
       <Popups toast={toast} />
@@ -784,6 +809,41 @@ function App() {
   return (
     <div className="flex h-screen bg-zinc-950 text-zinc-300 font-sans overflow-hidden">
       <Popups toast={toast} unreadAnnouncement={unreadAnnouncement} currentUser={currentUser} setUnreadAnnouncement={setUnreadAnnouncement} fetchData={fetchData} lang={lang} />
+      
+      {/* 🔐 GÜVENLİK: ZORUNLU ŞİFRE DEĞİŞTİRME EKRANI */}
+      {currentUser?.mustChangePassword && (
+        <div className="fixed inset-0 z-[999] bg-zinc-950 flex items-center justify-center p-6 backdrop-blur-md">
+          <div className="bg-zinc-900 border border-zinc-800 p-8 rounded-2xl w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-300">
+            <div className="w-14 h-14 bg-indigo-500/10 rounded-xl flex items-center justify-center mb-6 border border-indigo-500/20">
+               <Lock className="w-7 h-7 text-indigo-400" />
+            </div>
+            <h2 className="text-2xl font-bold text-zinc-100 mb-2">{tr('Password Change Required', 'Şifre Değişikliği Zorunlu')}</h2>
+            <p className="text-zinc-400 text-sm mb-8 leading-relaxed">
+              {tr('Your account has been created with a temporary password. For your security, you must set a new password before continuing.', 'Hesabınız geçici bir şifre ile oluşturulmuştur. Güvenliğiniz için devam etmeden önce yeni bir şifre belirlemelisiniz.')}
+            </p>
+
+            <form onSubmit={handleMustChangePassword} className="space-y-5">
+               <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">{tr('New Password', 'Yeni Şifre')}</label>
+                  <Input type="password" value={mustPass} onChange={e => setMustPass(e.target.value)} placeholder="••••••••" required />
+               </div>
+               <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">{tr('Confirm New Password', 'Yeni Şifreyi Onayla')}</label>
+                  <Input type="password" value={mustConf} onChange={e => setMustConf(e.target.value)} placeholder="••••••••" required />
+               </div>
+               <div className="pt-4">
+                  <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-500 py-4 shadow-lg shadow-indigo-500/10" disabled={isProcessing}>
+                    {isProcessing ? tr('Processing...', 'İşleniyor...') : tr('Update & Continue', 'Güncelle ve Devam Et')}
+                  </Button>
+               </div>
+               <button type="button" onClick={() => { localStorage.removeItem('token'); window.location.reload(); }} className="w-full text-xs text-zinc-500 hover:text-zinc-300 transition-colors py-2">
+                 {tr('Logout', 'Çıkış Yap')}
+               </button>
+            </form>
+          </div>
+        </div>
+      )}
+
       <MenuDrawer 
         currentTab={currentTab} 
         setCurrentTab={(val) => {

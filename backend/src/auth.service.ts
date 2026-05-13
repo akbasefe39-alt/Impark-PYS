@@ -45,6 +45,16 @@ export class AuthService {
       );
     }
 
+    // 🛡️ GÜVENLİK: Eğer şifre "123" ise veya zorunlu değişim bayrağı aktifse
+    let mustChange = user.mustChangePassword;
+    if (pass === '123') {
+      mustChange = true;
+      // Veritabanında da işaretleyelim ki sonraki girişlerde de hatırlansın (opsiyonel ama güvenli)
+      if (!user.mustChangePassword) {
+        await this.userRepo.update(user.id, { mustChangePassword: true });
+      }
+    }
+
     // 🔐 GÜVENLİK: MFA Kontrolü
     if (user.mfaEnabled) {
       const code = Math.floor(100000 + Math.random() * 900000).toString();
@@ -87,8 +97,12 @@ export class AuthService {
         user.canManageInventory || user.role === 'admin',
       canViewLogs:
         user.canViewLogs || user.role === 'admin',
+      mustChangePassword: mustChange,
     };
-    return { access_token: this.jwtService.sign(payload) };
+    return { 
+      access_token: this.jwtService.sign(payload),
+      mustChangePassword: mustChange 
+    };
   }
 
   // 🔐 MFA Kodunu Doğrula ve Ana Token'ı Ver
@@ -130,8 +144,12 @@ export class AuthService {
           user.canManageInventory || user.role === 'admin',
         canViewLogs:
           user.canViewLogs || user.role === 'admin',
+        mustChangePassword: user.mustChangePassword,
       };
-      return { access_token: this.jwtService.sign(finalPayload) };
+      return { 
+        access_token: this.jwtService.sign(finalPayload),
+        mustChangePassword: user.mustChangePassword
+      };
     } catch (err) {
       throw new UnauthorizedException('MFA doğrulaması başarısız oldu.');
     }
@@ -173,7 +191,10 @@ export class AuthService {
       if (!user) throw new NotFoundException('Kullanıcı bulunamadı.');
 
       const hashedPassword = await bcrypt.hash(newPass, 10);
-      await this.userRepo.update(user.id, { password: hashedPassword });
+      await this.userRepo.update(user.id, { 
+        password: hashedPassword,
+        mustChangePassword: false 
+      });
 
       return { success: true };
     } catch (err) {

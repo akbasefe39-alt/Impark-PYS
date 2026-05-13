@@ -128,6 +128,7 @@ export class AppController implements OnModuleInit {
     
     if (body.password && body.password.trim() !== '') {
       updateData.password = await bcrypt.hash(body.password, 10);
+      updateData.mustChangePassword = false;
     }
 
     if (body.tcKimlikNo !== undefined) updateData.tcKimlikNo = body.tcKimlikNo;
@@ -358,6 +359,7 @@ export class AppController implements OnModuleInit {
             item.Email ||
             `user${Math.floor(Math.random() * 10000)}@pys.com`,
           password: hashedPassword,
+          mustChangePassword: true,
           role: 'personel',
           unvan: item.unvan || item.Unvan || 'Personel',
           iseGirisTarihi:
@@ -417,6 +419,7 @@ export class AppController implements OnModuleInit {
       lastName: body.lastName,
       email: body.email,
       password: hashedPassword,
+      mustChangePassword: true,
       role: body.role || 'personel',
       unvan: body.unvan,
       toplamIzinHakki: Number(body.toplamIzinHakki || 14),
