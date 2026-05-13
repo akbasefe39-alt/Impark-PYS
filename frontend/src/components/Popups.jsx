@@ -1,8 +1,10 @@
 import React from 'react';
 import Button from './Button';
 import api from '../api';
+import { getDict } from '../utils';
 
-const Popups = ({ toast, unreadAnnouncement, currentUser, setUnreadAnnouncement, fetchData }) => {
+const Popups = ({ toast, unreadAnnouncement, currentUser, setUnreadAnnouncement, fetchData, lang }) => {
+  const tr = getDict(lang);
   return (
     <>
       {toast.show && (
@@ -14,16 +16,20 @@ const Popups = ({ toast, unreadAnnouncement, currentUser, setUnreadAnnouncement,
       {unreadAnnouncement && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[800] flex items-center justify-center p-4 xl:p-0 animate-in fade-in duration-200">
            <div className="bg-zinc-950 border border-zinc-800 p-8 rounded-xl max-w-xl w-full flex flex-col shadow-2xl">
-              <h2 className="text-xl font-semibold text-zinc-100 mb-2">Announcement</h2>
+              <h2 className="text-xl font-semibold text-zinc-100 mb-2">{tr('Announcement', 'Duyuru')}</h2>
               <h3 className="text-sm font-medium text-indigo-400 mb-6">{unreadAnnouncement.baslik}</h3>
               <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6 mb-8">
                  <p className="text-zinc-300 text-sm leading-relaxed whitespace-pre-wrap">{unreadAnnouncement.icerik}</p>
               </div>
               <div className="text-xs text-zinc-500 font-medium mb-8 pt-4 border-t border-zinc-800 flex justify-between">
-                <span>Published by: {unreadAnnouncement.yapanKisi}</span>
-                <span>Date: {unreadAnnouncement.tarih}</span>
+                <span>{tr('Published by:', 'Yayınlayan:')} {unreadAnnouncement.yapanKisi}</span>
+                <span>{tr('Date:', 'Tarih:')} {unreadAnnouncement.tarih}</span>
               </div>
-              <Button className="w-full" onClick={async () => { await api.post(`/users/duyuru-oku/${unreadAnnouncement.id}`, { userId: currentUser.id }); setUnreadAnnouncement(null); fetchData(currentUser.id); }}>Acknowledge</Button>
+              <Button className="w-full" onClick={async () => { 
+                await api.post(`/users/duyuru-oku/${unreadAnnouncement.id}`, { userId: currentUser.id }); 
+                setUnreadAnnouncement(null); 
+                fetchData(currentUser.id, currentUser.role); 
+              }}>{tr('Acknowledge', 'Anladım')}</Button>
            </div>
         </div>
       )}

@@ -395,7 +395,7 @@ function App() {
       setChecklists(clData);
 
       const unread = dyData.find(an => !an.okuyanlar?.some(u => parseInt(u.id) === parseInt(userId)));
-      if (unread) setUnreadAnnouncement(unread);
+      setUnreadAnnouncement(unread || null);
     } catch (e) {
       console.error("Critical Fetch Error:", e);
     }
