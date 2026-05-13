@@ -31,7 +31,32 @@ const MainHeader = ({ currentTab, searchTerm, setSearchTerm, statusFilter, setSt
           <button onClick={() => setSidebarOpen(!sidebarOpen)} className="text-zinc-400 hover:text-zinc-100 transition-colors p-2 md:p-1.5 bg-zinc-900 rounded-md border border-zinc-800">
             <Menu className="w-5 h-5 md:w-4 h-4" />
           </button>
-          <h2 className="text-sm md:text-base font-semibold text-zinc-100 capitalize tracking-tight px-1 truncate max-w-[120px] md:max-w-none">{currentTab.replace('_', ' ')}</h2>
+          <h2 className="text-sm md:text-base font-semibold text-zinc-100 capitalize tracking-tight px-1 truncate max-w-[120px] md:max-w-none">
+            {(() => {
+              const tabMap = {
+                'home': tr('Home', 'Ana Sayfa'),
+                'dashboard': tr('Dashboard', 'Özet Panel'),
+                'raporlar': tr('Reports', 'Raporlar'),
+                'personel': tr('Staff', 'Personel Listesi'),
+                'performans': tr('Performance', 'Performans'),
+                'yetki': tr('Roles', 'Yetki & Roller'),
+                'departman': tr('Departments', 'Birimler'),
+                'izin': tr('Leaves', 'İzin Talepleri'),
+                'mesai': tr('Attendance', 'Mesai / PDKS'),
+                'gorevler': tr('Tasks', 'Görev Akışı'),
+                'harcamalar': tr('Expenses', 'Harcamalar'),
+                'maas': tr('Payroll', 'Maaş & Bordro'),
+                'zimmet': tr('Assets', 'Zimmetler'),
+                'duyuru_arşiv': tr('Announcements', 'Duyurular'),
+                'onboarding': tr('Onboarding', 'İşe Giriş/Çıkış'),
+                'belgeler': tr('Documents', 'Belge Arşivi'),
+                'logs': tr('Logs', 'Sistem Kayıtları'),
+                'security': tr('Security', 'Güvenlik Merkezi'),
+                'trash': tr('Recycle Bin', 'Çöp Kutusu')
+              };
+              return tabMap[currentTab] || currentTab.replace('_', ' ');
+            })()}
+          </h2>
         </div>
         
         {/* Mobilde Yeni İşlem Butonu Sola Alındı */}
