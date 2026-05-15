@@ -1419,24 +1419,33 @@ function App() {
                       </h3>
                       <p className="text-zinc-500 text-sm mt-2 max-w-xl">{tr('Perform deep analysis of your system. Scanning for XSS injections, weak configurations, and outdated dependencies.', 'Sisteminizi derinlemesine analiz edin. XSS enjeksiyonları, zayıf konfigürasyonlar ve güncel olmayan bağımlılıklar taranır.')}</p>
                     </div>
-                    <Button 
-                      onClick={async () => {
-                         setIsScanning(true);
-                         try {
-                           const res = await api.post('/security/scan');
-                           setSecurityReport(res.data.report);
-                           showNotification(tr('Security scan completed.', 'Güvenlik taraması başarıyla tamamlandı.'));
-                         } catch(e) {
-                           showNotification(tr('Scan failed.', 'Tarama başarısız oldu.'), 'error');
-                         } finally {
-                           setIsScanning(false);
-                         }
-                      }}
-                      disabled={isScanning}
-                      className={`h-12 px-8 font-bold text-sm shadow-lg shadow-indigo-500/10 transition-all ${isScanning ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}`}
-                    >
-                      {isScanning ? tr('Scanning...', 'Taranıyor...') : tr('Start Full Audit', 'Tam Denetimi Başlat')}
-                    </Button>
+                    <div className="flex flex-col sm:flex-row gap-3 relative z-10">
+                      <Button 
+                        variant="outline"
+                        className="h-12 px-6 border-amber-500/20 text-amber-500 hover:bg-amber-500/10 gap-2 font-bold"
+                        onClick={() => handleAction('post', '/users/scan-weak-passwords', {}, tr('Weak password scan completed.', 'Zayıf şifre taraması tamamlandı.'))}
+                      >
+                         <AlertCircle className="w-5 h-5" /> {tr('Scan Default Passwords', 'Varsayılan Şifreleri Tara')}
+                      </Button>
+                      <Button 
+                        onClick={async () => {
+                           setIsScanning(true);
+                           try {
+                             const res = await api.post('/security/scan');
+                             setSecurityReport(res.data.report);
+                             showNotification(tr('Security scan completed.', 'Güvenlik taraması başarıyla tamamlandı.'));
+                           } catch(e) {
+                             showNotification(tr('Scan failed.', 'Tarama başarısız oldu.'), 'error');
+                           } finally {
+                             setIsScanning(false);
+                           }
+                        }}
+                        disabled={isScanning}
+                        className={`h-12 px-8 font-bold text-sm shadow-lg shadow-indigo-500/10 transition-all ${isScanning ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}`}
+                      >
+                        {isScanning ? tr('Scanning...', 'Taranıyor...') : tr('Start Full Audit', 'Tam Denetimi Başlat')}
+                      </Button>
+                    </div>
                   </div>
 
                   {securityReport && (
@@ -2052,6 +2061,8 @@ function App() {
               )}
             </div>
           )}
+
+
 
           {isLoggedIn && currentTab === 'mail' && (
             <div className="space-y-6 animate-in slide-in-from-bottom-6 p-6">

@@ -653,6 +653,34 @@ export class AppController implements OnModuleInit {
     }
   }
 
+  @Roles('admin')
+  @Post('scan-weak-passwords')
+  async scanWeakPasswords() {
+    const users = await this.userRepo.find();
+    let flaggedCount = 0;
+
+    for (const user of users) {
+      // Eğer zaten işaretli değilse kontrol et
+      if (!user.mustChangePassword) {
+        const isDefault = await bcrypt.compare('123', user.password);
+        if (isDefault) {
+          await this.userRepo.update(user.id, { mustChangePassword: true });
+          flaggedCount++;
+        }
+      }
+    }
+
+    // Logla
+    await this.logRepo.save({
+      islem: `Zayıf Şifre Taraması Yapıldı: ${flaggedCount} kullanıcı işaretlendi`,
+      yapanKisi: 'Admin',
+      tarih: new Date().toLocaleString('tr-TR'),
+      newData: JSON.stringify({ taranan: users.length, isaretlenen: flaggedCount }),
+    });
+
+    return { success: true, flaggedCount, totalScanned: users.length };
+  }
+
   @Post('update-dashboard-layout/:id')
   async updateDashboardLayout(
     @Param('id') id: number,
