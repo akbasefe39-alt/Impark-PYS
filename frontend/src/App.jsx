@@ -12,7 +12,7 @@ import ChatDock from './components/ChatDock.jsx';
 import MainHeader from './components/MainHeader.jsx';
 import Drawer from './components/Drawer.jsx';
 import EditModal from './components/EditModal.jsx';
-import { Users, CalendarClock, Building, HandCoins, AlertCircle, Trash2, FolderOpen, ClipboardList, Activity, Settings, ScrollText, BarChart as BarChartIcon, PieChart as PieChartIcon, Shield, Lock, Mails } from 'lucide-react';
+import { Users, CalendarClock, Building, HandCoins, AlertCircle, Trash2, FolderOpen, ClipboardList, Activity, Settings, ScrollText, BarChart as BarChartIcon, PieChart as PieChartIcon, Shield, Lock, Mails, Send } from 'lucide-react';
 import { getDict, downloadCSV, generatePayslipPDF, generateLeaveRequestPDF, generateEmployeeCardPDF } from './utils.js';
 import GenericCustomizer from './components/GenericCustomizer.jsx';
 import ReportsDashboard from './components/ReportsDashboard.jsx';
@@ -250,9 +250,14 @@ function App() {
     if (!isLoggedIn) return;
 
     let timeoutId;
+    let lastActivity = Date.now();
     const INACTIVITY_TIME = 15 * 60 * 1000; // 15 dakika
 
-    const resetTimer = () => {
+    const resetTimer = (e) => {
+      // 🛡️ PERFORMANS: Mousemove olayını 30 saniyede bir işle (throttle)
+      if (e?.type === 'mousemove' && Date.now() - lastActivity < 30000) return;
+      lastActivity = Date.now();
+
       if (timeoutId) clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
         handleLogout();
@@ -2053,7 +2058,7 @@ function App() {
               <div className="bg-zinc-900 p-8 rounded-2xl border border-zinc-800 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
-                     <Mails className="w-6 h-6 text-indigo-500" />
+                     <Send className="w-6 h-6 text-indigo-500" />
                   </div>
                   <div>
                     <h3 className="text-xl font-bold text-zinc-100">{tr('Email Center', 'E-Posta Merkezi')}</h3>
@@ -2138,7 +2143,7 @@ function App() {
                              setSelectedMailUsers([]);
                            }}
                          >
-                           <Mails className="w-4 h-4 mr-2" />
+                           <Send className="w-4 h-4 mr-2" />
                            {tr('Send Emails', 'E-Postaları Gönder')}
                          </Button>
                       </div>

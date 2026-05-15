@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, LayoutDashboard, Users, Activity, Key, Building2, CalendarRange, Clock, ClipboardList, Receipt, Banknote, MonitorPlay, Mails, Files, ScrollText, Trash2, LogOut, BarChart, X, Shield } from 'lucide-react';
+import { Home, LayoutDashboard, Users, Activity, Key, Building2, CalendarRange, Clock, ClipboardList, Receipt, Banknote, MonitorPlay, Mails, Files, ScrollText, Trash2, LogOut, BarChart, X, Shield, Send } from 'lucide-react';
 
 import { IMPARK_LOGO } from '../assets/logo';
 
@@ -25,7 +25,7 @@ const MenuDrawer = ({ currentTab, setCurrentTab, t, isManager, isAdmin, currentU
     { id: 'belgeler', label: t.docs, allowed: true, icon: Files },
     { id: 'logs', label: t.logs, allowed: isAdmin, icon: ScrollText },
     { id: 'security', label: t.security || 'Güvenlik Merkezi', allowed: isAdmin, icon: Shield },
-    { id: 'mail', label: t.mail || 'E-Posta Merkezi', allowed: isAdmin, icon: Mails },
+    { id: 'mail', label: t.mail || 'E-Posta Merkezi', allowed: isAdmin, icon: Send },
     { id: 'trash', label: t.trash, allowed: isAdmin, icon: Trash2 },
   ];
 

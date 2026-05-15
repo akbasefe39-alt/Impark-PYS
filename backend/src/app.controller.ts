@@ -617,8 +617,8 @@ export class AppController implements OnModuleInit {
   @Roles('admin')
   @Post('send-custom-email')
   async sendCustomEmail(@Body() body: { userIds: number[], subject: string, message: string }) {
-    if (!body.userIds || !body.subject || !body.message) {
-      throw new BadRequestException('Eksik bilgi: userIds, subject veya message gerekli.');
+    if (!body.userIds || !Array.isArray(body.userIds) || body.userIds.length === 0 || !body.subject || !body.message) {
+      throw new BadRequestException('Eksik bilgi: userIds (dizi), subject veya message gerekli.');
     }
 
     const users = await this.userRepo.find({
@@ -635,17 +635,22 @@ export class AppController implements OnModuleInit {
       throw new BadRequestException('Seçilen kullanıcıların e-posta adresi bulunmuyor.');
     }
 
-    await this.mailService.sendCustomMail(emails, body.subject, body.message);
-    
-    // Logla
-    await this.logRepo.save({
-      islem: `Toplu/Tekil Mail Gönderildi: ${body.subject}`,
-      yapanKisi: 'Admin',
-      tarih: new Date().toLocaleString('tr-TR'),
-      newData: JSON.stringify({ aliciSayisi: emails.length, konu: body.subject }),
-    });
+    try {
+      await this.mailService.sendCustomMail(emails, body.subject, body.message);
+      
+      // Logla
+      await this.logRepo.save({
+        islem: `Toplu/Tekil Mail Gönderildi: ${body.subject}`,
+        yapanKisi: 'Admin',
+        tarih: new Date().toLocaleString('tr-TR'),
+        newData: JSON.stringify({ aliciSayisi: emails.length, konu: body.subject }),
+      });
 
-    return { success: true, count: emails.length };
+      return { success: true, count: emails.length };
+    } catch (err) {
+      console.error('Mail Sending Error:', err);
+      throw new InternalServerErrorException('E-posta gönderimi sırasında bir hata oluştu: ' + err.message);
+    }
   }
 
   @Post('update-dashboard-layout/:id')

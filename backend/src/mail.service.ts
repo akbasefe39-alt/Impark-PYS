@@ -153,7 +153,8 @@ export class MailService {
 
     const info = await this.transporter.sendMail({
       from: '"İMPARK Bilgilendirme" <info@impark.com>',
-      to: to.join(','),
+      to: to.length === 1 ? to[0] : '"İMPARK Personel" <info@impark.com>', // Tek kişi ise To, toplu ise generic To
+      bcc: to.length > 1 ? to : undefined, // Toplu ise Bcc kullan (Gizlilik)
       subject: subject,
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 30px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
