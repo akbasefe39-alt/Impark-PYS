@@ -12,7 +12,7 @@ import ChatDock from './components/ChatDock.jsx';
 import MainHeader from './components/MainHeader.jsx';
 import Drawer from './components/Drawer.jsx';
 import EditModal from './components/EditModal.jsx';
-import { Users, CalendarClock, Building, HandCoins, AlertCircle, Trash2, FolderOpen, ClipboardList, Activity, Settings, ScrollText, BarChart as BarChartIcon, PieChart as PieChartIcon, Shield, Lock } from 'lucide-react';
+import { Users, CalendarClock, Building, HandCoins, AlertCircle, Trash2, FolderOpen, ClipboardList, Activity, Settings, ScrollText, BarChart as BarChartIcon, PieChart as PieChartIcon, Shield, Lock, Mails } from 'lucide-react';
 import { getDict, downloadCSV, generatePayslipPDF, generateLeaveRequestPDF, generateEmployeeCardPDF } from './utils.js';
 import GenericCustomizer from './components/GenericCustomizer.jsx';
 import ReportsDashboard from './components/ReportsDashboard.jsx';
@@ -138,10 +138,13 @@ function App() {
   const [taskForm, setTaskForm] = useState({ personelId: '', baslik: '', aciklama: '', sonTarih: '' });
   const [expForm, setExpForm] = useState({ personelId: '', baslik: '', miktar: '', tarih: '' });
   const [docForm, setDocForm] = useState({ personelId: '', dosyaAdi: '', dosyaTuru: 'Sözleşme', dosyaIcerik: null });
+  const [selectedMailUsers, setSelectedMailUsers] = useState([]);
+  const [mailSubject, setMailSubject] = useState('');
+  const [mailContent, setMailContent] = useState('');
 
   const t = {
-    TR: { dash: 'Özet Panel', staff: 'Personel Ağı', tasks: 'Görev Akışı', archived: 'Duyurular', assets: 'Demirbaşlar', logout: 'Çıkış', add: 'Yeni İşlem', empty: 'Kayıt Bulunamadı', perf: 'AI Analiz', trash: 'Çöp Kutusu', roles: 'Yetki & Roller', pdks: 'Mesai / PDKS', finance: 'Bordro & Maaş', deps: 'Departmanlar', leaves: 'İzin Talepleri', exp: 'Harcamalar', docs: 'Belge Arşivi', logs: 'Sistem Kayıtları', apps: 'Uygulamalar', onboarding: 'İşe Giriş/Çıkış', raporlar: 'Raporlar & Analiz', security: 'Güvenlik Merkezi' },
-    EN: { dash: 'Dashboard', staff: 'Staff Network', tasks: 'Tasks', archived: 'Announcements', assets: 'Assets', logout: 'Logout', add: 'New Action', empty: 'No Data Found', perf: 'AI Analysis', trash: 'Recycle Bin', roles: 'Roles & Auth', pdks: 'Attendance', finance: 'Payroll', deps: 'Departments', leaves: 'Leave Requests', exp: 'Expenses', docs: 'Documents', logs: 'System Logs', apps: 'Applications', onboarding: 'Onboarding', raporlar: 'Reports & Analytics', security: 'Security Center' }
+    TR: { dash: 'Özet Panel', staff: 'Personel Ağı', tasks: 'Görev Akışı', archived: 'Duyurular', assets: 'Demirbaşlar', logout: 'Çıkış', add: 'Yeni İşlem', empty: 'Kayıt Bulunamadı', perf: 'AI Analiz', trash: 'Çöp Kutusu', roles: 'Yetki & Roller', pdks: 'Mesai / PDKS', finance: 'Bordro & Maaş', deps: 'Departmanlar', leaves: 'İzin Talepleri', exp: 'Harcamalar', docs: 'Belge Arşivi', logs: 'Sistem Kayıtları', apps: 'Uygulamalar', onboarding: 'İşe Giriş/Çıkış', raporlar: 'Raporlar & Analiz', security: 'Güvenlik Merkezi', mail: 'E-Posta Merkezi' },
+    EN: { dash: 'Dashboard', staff: 'Staff Network', tasks: 'Tasks', archived: 'Announcements', assets: 'Assets', logout: 'Logout', add: 'New Action', empty: 'No Data Found', perf: 'AI Analysis', trash: 'Recycle Bin', roles: 'Roles & Auth', pdks: 'Attendance', finance: 'Payroll', deps: 'Departments', leaves: 'Leave Requests', exp: 'Expenses', docs: 'Documents', logs: 'System Logs', apps: 'Applications', onboarding: 'Onboarding', raporlar: 'Reports & Analytics', security: 'Security Center', mail: 'Email Center' }
   }[lang];
 
   useEffect(() => {
@@ -2042,6 +2045,106 @@ function App() {
                   </div>
                 </div>
               )}
+            </div>
+          )}
+
+          {isLoggedIn && currentTab === 'mail' && (
+            <div className="space-y-6 animate-in slide-in-from-bottom-6 p-6">
+              <div className="bg-zinc-900 p-8 rounded-2xl border border-zinc-800 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
+                     <Mails className="w-6 h-6 text-indigo-500" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-zinc-100">{tr('Email Center', 'E-Posta Merkezi')}</h3>
+                    <p className="text-sm text-zinc-500 mt-1">{tr('Send announcements or specific alerts to personnel.', 'Personellere toplu veya tekil e-posta gönderin.')}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Personel Listesi (Sol) */}
+                <div className="lg:col-span-1 bg-zinc-900 border border-zinc-800 rounded-2xl flex flex-col h-[600px] overflow-hidden">
+                  <div className="p-4 border-b border-zinc-800 flex justify-between items-center bg-zinc-950/30">
+                     <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{tr('Recipient List', 'Alıcı Listesi')}</h4>
+                     <button onClick={() => {
+                       if(selectedMailUsers.length === personeller.length) setSelectedMailUsers([]);
+                       else setSelectedMailUsers(personeller.map(p => p.id));
+                     }} className="text-[10px] text-indigo-400 hover:text-indigo-300 font-bold uppercase">{selectedMailUsers.length === personeller.length ? tr('Deselect All', 'Temizle') : tr('Select All', 'Hepsini Seç')}</button>
+                  </div>
+                  <div className="p-4 border-b border-zinc-800">
+                     <input 
+                       className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs outline-none focus:border-indigo-500 transition-all text-zinc-100 placeholder-zinc-700" 
+                       placeholder={tr('Search personnel...', 'Personel ara...')}
+                       value={searchTerm}
+                       onChange={e => setSearchTerm(e.target.value)}
+                     />
+                  </div>
+                  <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1">
+                    {filterData(personeller, true).map(p => (
+                      <div 
+                        key={p.id} 
+                        onClick={() => {
+                          setSelectedMailUsers(prev => prev.includes(p.id) ? prev.filter(id => id !== p.id) : [...prev, p.id]);
+                        }}
+                        className={`p-3 rounded-xl border flex items-center gap-3 cursor-pointer transition-all ${selectedMailUsers.includes(p.id) ? 'bg-indigo-600/10 border-indigo-500/30 ring-1 ring-indigo-500/20' : 'bg-zinc-950 border-zinc-800/50 hover:border-zinc-700'}`}
+                      >
+                         <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${selectedMailUsers.includes(p.id) ? 'bg-indigo-600 border-indigo-500' : 'bg-zinc-900 border-zinc-700'}`}>
+                           {selectedMailUsers.includes(p.id) && <div className="w-1.5 h-1.5 rounded-full bg-white"></div>}
+                         </div>
+                         <div className="flex-1 min-w-0">
+                           <p className="text-xs font-bold text-zinc-200 truncate">{p.firstName} {p.lastName}</p>
+                           <p className="text-[10px] text-zinc-500 truncate">{p.email}</p>
+                         </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="p-4 bg-zinc-950/50 border-t border-zinc-800 text-[10px] text-zinc-500 font-medium">
+                    {selectedMailUsers.length} {tr('personnel selected.', 'personel seçildi.')}
+                  </div>
+                </div>
+
+                {/* Mail Formu (Sağ) */}
+                <div className="lg:col-span-2 space-y-6">
+                   <div className="bg-zinc-900 p-8 rounded-2xl border border-zinc-800 space-y-6">
+                      <div className="space-y-2">
+                         <label className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{tr('Subject', 'E-Posta Konusu')}</label>
+                         <input 
+                           value={mailSubject}
+                           onChange={e => setMailSubject(e.target.value)}
+                           className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-zinc-100" 
+                           placeholder={tr('Enter subject...', 'Konu başlığını girin...')}
+                         />
+                      </div>
+                      <div className="space-y-2">
+                         <label className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{tr('Message', 'Mesaj İçeriği')}</label>
+                         <textarea 
+                           rows="12"
+                           value={mailContent}
+                           onChange={e => setMailContent(e.target.value)}
+                           className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-zinc-100 resize-none" 
+                           placeholder={tr('Type your message here...', 'Mesajınızı buraya yazın...')}
+                         />
+                      </div>
+                      <div className="pt-4 flex justify-end">
+                         <Button 
+                           className="px-8 py-3" 
+                           variant="ai"
+                           disabled={selectedMailUsers.length === 0 || !mailSubject || !mailContent}
+                           onClick={() => {
+                             handleAction('post', '/users/send-custom-email', { userIds: selectedMailUsers, subject: mailSubject, message: mailContent }, tr('Emails are being sent.', 'E-Postalar gönderiliyor.'));
+                             setMailSubject('');
+                             setMailContent('');
+                             setSelectedMailUsers([]);
+                           }}
+                         >
+                           <Mails className="w-4 h-4 mr-2" />
+                           {tr('Send Emails', 'E-Postaları Gönder')}
+                         </Button>
+                      </div>
+                   </div>
+                </div>
+              </div>
             </div>
           )}
         </div>

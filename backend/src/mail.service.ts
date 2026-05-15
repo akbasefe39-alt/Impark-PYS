@@ -146,4 +146,32 @@ export class MailService {
       `,
     });
   }
+
+  // ✉️ Özel Mail Gönder (Admin Tarafından)
+  async sendCustomMail(to: string[], subject: string, content: string) {
+    if (!this.transporter) await this.init();
+
+    const info = await this.transporter.sendMail({
+      from: '"İMPARK Bilgilendirme" <info@impark.com>',
+      to: to.join(','),
+      subject: subject,
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 30px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+          <div style="text-align: center; margin-bottom: 25px;">
+            <h2 style="color: #4f46e5; margin: 0; font-size: 24px;">${subject}</h2>
+            <div style="width: 50px; height: 3px; background: #4f46e5; margin: 15px auto;"></div>
+          </div>
+          <div style="color: #334155; line-height: 1.8; margin: 25px 0; font-size: 16px; white-space: pre-wrap;">
+${content}
+          </div>
+          <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #f1f5f9; text-align: center;">
+            <p style="font-size: 12px; color: #94a3b8; margin: 0;">Bu e-posta İMPARK Yönetim Sistemi üzerinden Admin tarafından otomatik olarak gönderilmiştir.</p>
+            <p style="font-size: 11px; color: #cbd5e1; margin-top: 5px;">&copy; ${new Date().getFullYear()} İMPARK PYS</p>
+          </div>
+        </div>
+      `,
+    });
+    console.log(`✅ [MailService] Özel mail gönderildi (${to.length} alıcı)`);
+    return nodemailer.getTestMessageUrl(info);
+  }
 }

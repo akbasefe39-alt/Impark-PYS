@@ -614,6 +614,40 @@ export class AppController implements OnModuleInit {
     return { success: true };
   }
 
+  @Roles('admin')
+  @Post('send-custom-email')
+  async sendCustomEmail(@Body() body: { userIds: number[], subject: string, message: string }) {
+    if (!body.userIds || !body.subject || !body.message) {
+      throw new BadRequestException('Eksik bilgi: userIds, subject veya message gerekli.');
+    }
+
+    const users = await this.userRepo.find({
+      where: body.userIds.map(id => ({ id })) as any
+    });
+
+    if (users.length === 0) {
+      throw new NotFoundException('Hiçbir kullanıcı bulunamadı.');
+    }
+
+    const emails = users.map(u => u.email).filter(e => !!e);
+    
+    if (emails.length === 0) {
+      throw new BadRequestException('Seçilen kullanıcıların e-posta adresi bulunmuyor.');
+    }
+
+    await this.mailService.sendCustomMail(emails, body.subject, body.message);
+    
+    // Logla
+    await this.logRepo.save({
+      islem: `Toplu/Tekil Mail Gönderildi: ${body.subject}`,
+      yapanKisi: 'Admin',
+      tarih: new Date().toLocaleString('tr-TR'),
+      newData: JSON.stringify({ aliciSayisi: emails.length, konu: body.subject }),
+    });
+
+    return { success: true, count: emails.length };
+  }
+
   @Post('update-dashboard-layout/:id')
   async updateDashboardLayout(
     @Param('id') id: number,

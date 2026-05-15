@@ -25,6 +25,7 @@ const MenuDrawer = ({ currentTab, setCurrentTab, t, isManager, isAdmin, currentU
     { id: 'belgeler', label: t.docs, allowed: true, icon: Files },
     { id: 'logs', label: t.logs, allowed: isAdmin, icon: ScrollText },
     { id: 'security', label: t.security || 'Güvenlik Merkezi', allowed: isAdmin, icon: Shield },
+    { id: 'mail', label: t.mail || 'E-Posta Merkezi', allowed: isAdmin, icon: Mails },
     { id: 'trash', label: t.trash, allowed: isAdmin, icon: Trash2 },
   ];
 
