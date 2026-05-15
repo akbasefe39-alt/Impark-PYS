@@ -276,6 +276,17 @@ function App() {
     };
   }, [isLoggedIn]);
 
+  // 🛡️ GÜVENLİK: Diğer sekmelerde çıkış yapıldığında bu sekmeyi de kapat (Cross-tab Sync)
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === 'token' && !e.newValue) {
+        window.location.reload();
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
   // 🛡️ GÜVENLİK SENKRONİZASYONU: Kişisel ayarları Token yerine API'den (me) al
   useEffect(() => {
     if (me) {
@@ -1636,7 +1647,20 @@ function App() {
                       <p className="text-sm text-zinc-300 leading-relaxed mb-6 line-clamp-3">{i.neden}</p>
                     </div>
                     <div className="flex flex-col gap-3 pt-4 border-t border-zinc-800/50">
-                      <Button className="h-9 text-xs w-full" variant="outline" onClick={() => generateLeaveRequestPDF(i)}>{tr('Download PDF', 'PDF İndir')}</Button>
+                      <Button 
+                        className="h-9 text-xs w-full" 
+                        variant="outline" 
+                        onClick={() => {
+                          if (i.durum === 'Onaylandı') {
+                            generateLeaveRequestPDF(i);
+                            showNotification(tr('PDF successfully downloaded.', 'PDF başarıyla indirildi.'), 'success');
+                          } else {
+                            showNotification(tr('Manager/Admin approval required to download PDF.', 'PDF indirmek için yönetici veya admin onayı gereklidir.'), 'error');
+                          }
+                        }}
+                      >
+                        {tr('Download PDF', 'PDF İndir')}
+                      </Button>
 
                       {/* Çok Aşamalı Onay Butonları */}
                       {(
