@@ -548,7 +548,11 @@ export class AppController implements OnModuleInit {
     };
 
     if (body.password && body.password.trim() !== '') {
+      if (body.password.length < 8) {
+        throw new BadRequestException('Şifre en az 8 karakter olmalıdır!');
+      }
       updateData.password = await bcrypt.hash(body.password, 10);
+      updateData.mustChangePassword = false; // Şifre değiştiği için bayrağı temizle
     }
     
     if (body.departmanId) {

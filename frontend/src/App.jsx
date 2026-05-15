@@ -624,7 +624,7 @@ function App() {
   const handleResetPassword = async (e) => {
     e.preventDefault();
     if (newPass !== confPass) return showNotification(tr("Passwords do not match", "Şifreler uyuşmuyor"), "error");
-    if (newPass.length < 3) return showNotification(tr("Password too short", "Şifre çok kısa"), "error");
+    if (newPass.length < 8) return showNotification(tr("Password must be at least 8 characters", "Şifre en az 8 karakter olmalıdır"), "error");
     setIsProcessing(true);
     try {
       await api.post('/users/reset-password', { token: resetToken, newPassword: newPass });
@@ -641,7 +641,7 @@ function App() {
 
   const handleMustChangePassword = async (e) => {
     e.preventDefault();
-    if (!mustPass || mustPass.length < 3) return showNotification(tr("Password too short", "Şifre çok kısa"), "error");
+    if (!mustPass || mustPass.length < 8) return showNotification(tr("Password must be at least 8 characters", "Şifre en az 8 karakter olmalıdır"), "error");
     if (mustPass !== mustConf) return showNotification(tr("Passwords do not match", "Şifreler uyuşmuyor"), "error");
     
     setIsProcessing(true);

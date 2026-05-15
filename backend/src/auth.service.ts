@@ -187,6 +187,10 @@ export class AuthService {
       if (payload.type !== 'reset')
         throw new BadRequestException('Hatalı işlem türü.');
 
+      if (newPass.length < 8) {
+        throw new BadRequestException('Şifre en az 8 karakter olmalıdır!');
+      }
+
       const user = await this.userRepo.findOne({ where: { id: payload.sub } });
       if (!user) throw new NotFoundException('Kullanıcı bulunamadı.');
 
